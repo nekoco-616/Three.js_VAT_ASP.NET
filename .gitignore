@@ -1,0 +1,12 @@
+## Ignore Visual Studio temporary files, build results, and containers
+.vs/
+[Bb]in/
+[Oo]bj/
+
+# User-specific files
+*.user
+*.userosscache
+*.suo
+
+# Others
+*.DS_Store
