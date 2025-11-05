@@ -1,0 +1,132 @@
+@page "/uv-list"
+@inject IJSRuntime JSRuntime
+@implements IAsyncDisposable
+
+<h3>UV座標リスト</h3>
+
+<div class="row">
+    <div class="col-md-4">
+        <h5>設定</h5>
+        <div class="mb-3">
+            <label for="model-select" class="form-label">モデル</label>
+            <select id="model-select" class="form-select" @onchange="OnModelChange">
+                <option value="models/Cube.fbx" selected>Cube.fbx</option>
+                <option value="models/FBX_HQ.fbx">FBX_HQ.fbx</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">UVセット</label>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="uvSet" id="uvmap1" value="0" @onchange="OnUvSetChange" checked />
+                <label class="form-check-label" for="uvmap1">UVMap (uv)</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="uvSet" id="uvmap2" value="1" @onchange="OnUvSetChange" />
+                <label class="form-check-label" for="uvmap2">VertexUV (uv2)</label>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <h5>座標データ (@_uvCoords.Count 件)</h5>
+        <div style="height: 400px; overflow-y: auto; border: 1px solid #ccc;">
+            @if (_isLoading)
+            {
+                <p><em>Loading...</em></p>
+            }
+            else
+            {
+                <table class="table table-sm table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>U</th>
+                            <th>V</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (var i = 0; i < _uvCoords.Count; i++)
+                        {
+                            var (u, v) = _uvCoords[i];
+                            <tr>
+                                <td>@i</td>
+                                <td>@u.ToString("F6")</td>
+                                <td>@v.ToString("F6")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private IJSObjectReference? _module;
+    private string _selectedModel = "models/Cube.fbx";
+    private int _selectedUvSet = 0;
+    private bool _isLoading = true;
+    private List<(float u, float v)> _uvCoords = new();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/uv-list.js");
+            await LoadModelAndUvs();
+        }
+    }
+
+    private async Task LoadModelAndUvs()
+    {
+        if (_module is null) return;
+
+        _isLoading = true;
+        StateHasChanged();
+
+        await _module.InvokeVoidAsync("init", _selectedModel);
+        await FetchUvData();
+
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    private async Task FetchUvData()
+    {
+        if (_module is null) return;
+        _uvCoords.Clear();
+        var coords = await _module.InvokeAsync<List<float[]>>("getUvData", _selectedUvSet);
+        if (coords != null)
+        {
+            foreach (var c in coords)
+            {
+                _uvCoords.Add((c[0], c[1]));
+            }
+        }
+    }
+
+    private async Task OnModelChange(ChangeEventArgs e)
+    {
+        _selectedModel = e.Value?.ToString() ?? "";
+        if (!string.IsNullOrEmpty(_selectedModel))
+        {
+            await LoadModelAndUvs();
+        }
+    }
+
+    private async Task OnUvSetChange(ChangeEventArgs e)
+    {
+        _selectedUvSet = int.Parse(e.Value?.ToString() ?? "0");
+        _isLoading = true;
+        await FetchUvData();
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        if (_module is not null)
+        {
+            await _module.DisposeAsync();
+        }
+    }
+}
