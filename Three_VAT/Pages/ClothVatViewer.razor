@@ -1,0 +1,29 @@
+﻿@page "/cloth-vat-viewer"
+@inject IJSRuntime JSRuntime
+
+<h3>Cloth VAT Viewer</h3>
+
+<p>A static FBX model animated by a position texture.</p>
+
+<canvas id="vat-minimal-fbx-canvas" width="800" height="600" style="border: 1px solid black;"></canvas>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            float frame = 250.0f;
+
+            // ★★★ JS関数名と、モデルのパスをFBX用に修正 ★★★
+            await JSRuntime.InvokeVoidAsync("initClothVatViewer",
+                "vat-minimal-fbx-canvas",
+                //"models/Cube.fbx",
+                "models/FBX_HQ.fbx",
+
+                //"textures/Cube_pos.exr",
+                "textures/TEX_HQ_dynamic_pos.exr",
+
+                frame);
+        }
+    }
+}
