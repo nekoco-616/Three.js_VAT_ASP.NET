@@ -12,13 +12,17 @@
     {
         if (firstRender)
         {
-            float frame = 100.0f;
+            float frame = 250.0f;
 
             // ★★★ JS関数名と、モデルのパスをFBX用に修正 ★★★
             await JSRuntime.InvokeVoidAsync("initVatMinimalSceneFbx",
                 "vat-minimal-fbx-canvas",
-                "models/Cube.fbx",      // FBXモデルのパス
-                "textures/Cube_pos.exr",
+                //"models/Cube.fbx",
+                "models/FBX_HQ.fbx",
+
+                //"textures/Cube_pos.exr",
+                "textures/TEX_HQ_dynamic_pos.exr",
+
                 frame);
         }
     }

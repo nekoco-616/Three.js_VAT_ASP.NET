@@ -64,17 +64,19 @@ window.initVatMinimalSceneFbx = async (canvasId, modelPath, posTexturePath, maxM
             uniform float u_fps;
             uniform vec2 u_texSize;
 
+            attribute vec2 uv2; // 追加
+
             ${shader.vertexShader}
         `.replace(
             `#include <begin_vertex>`,
             `
             float motion = mod(u_time * u_fps, u_maxMotion);
             float currentFrame = floor(motion);
-            vec2 currentUv = uv;
+            vec2 currentUv = uv2; // 変更
 
             // Houdini VAT標準のUV計算 (1フレームの高さ=テクスチャ幅)
-            float frameHeightInPixels = u_texSize.x;
-            //currentUv.y += (currentFrame * frameHeightInPixels) / u_texSize.y;
+            float frameHeightInPixels = 4.0f / u_texSize.y;
+            currentUv.y += currentFrame * frameHeightInPixels;
 
             vec3 pos = texture2D(u_posTexture, currentUv).rgb;
             vec3 transformed = pos;
@@ -86,14 +88,6 @@ window.initVatMinimalSceneFbx = async (canvasId, modelPath, posTexturePath, maxM
     const model = fbx;
     model.traverse((child) => {
         if (child.isMesh) {
-
-            // ★★★★★ ここからが最重要 ★★★★★
-            // 索引付きジオメトリを、独立した三角形のジオメトリに変換する
-            const nonIndexedGeometry = child.geometry.toNonIndexed();
-            child.geometry.dispose(); // 古いジオメトリのメモリを解放
-            child.geometry = nonIndexedGeometry;
-            // ★★★★★ ここまで ★★★★★
-
             child.material = vatMaterial;
         }
     });
