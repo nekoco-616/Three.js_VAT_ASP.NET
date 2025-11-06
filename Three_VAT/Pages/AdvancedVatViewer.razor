@@ -1,0 +1,57 @@
+@page "/advanced-vat-viewer"
+@inject IJSRuntime JSRuntime
+
+<h1>Advanced VAT Viewer</h1>
+
+<div style="display: flex; gap: 20px; padding: 10px; align-items: center;">
+    <div>
+        <label>Time Multiplier: @TimeMultiplier.ToString("0.0")</label>
+        <input type="range" min="0" max="100" step="0.1" value="@TimeMultiplier" @oninput="OnTimeMultiplierChanged" />
+    </div>
+    <div>
+        <label>Min Size: @MinSize.ToString("0.00")</label>
+        <input type="range" min="0" max="1" step="0.01" value="@MinSize" @oninput="OnMinSizeChanged" />
+    </div>
+    <div>
+        <label>Passive Color Alpha: @PassiveColorAlpha.ToString("0.00")</label>
+        <input type="range" min="0" max="1" step="0.01" value="@PassiveColorAlpha" @oninput="OnPassiveColorAlphaChanged" />
+    </div>
+</div>
+
+<div id="container" style="width: 100%; height: 80vh; border: 1px solid #ccc;"></div>
+
+@code {
+    private double TimeMultiplier { get; set; } = 10.0;
+    private double MinSize { get; set; } = 0.4;
+    private double PassiveColorAlpha { get; set; } = 0.5;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("initAdvancedVatViewer", "#container");
+            // Set initial values from C# to the shader
+            await JSRuntime.InvokeVoidAsync("updateTimeMultiplier", TimeMultiplier);
+            await JSRuntime.InvokeVoidAsync("updateMinSize", MinSize);
+            await JSRuntime.InvokeVoidAsync("updatePassiveCol", PassiveColorAlpha);
+        }
+    }
+
+    private async Task OnTimeMultiplierChanged(ChangeEventArgs e)
+    {
+        TimeMultiplier = double.Parse(e.Value.ToString());
+        await JSRuntime.InvokeVoidAsync("updateTimeMultiplier", TimeMultiplier);
+    }
+
+    private async Task OnMinSizeChanged(ChangeEventArgs e)
+    {
+        MinSize = double.Parse(e.Value.ToString());
+        await JSRuntime.InvokeVoidAsync("updateMinSize", MinSize);
+    }
+
+    private async Task OnPassiveColorAlphaChanged(ChangeEventArgs e)
+    {
+        PassiveColorAlpha = double.Parse(e.Value.ToString());
+        await JSRuntime.InvokeVoidAsync("updatePassiveCol", PassiveColorAlpha);
+    }
+}
