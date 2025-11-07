@@ -1,5 +1,6 @@
 @page "/cloth-vat-viewer"
 @inject IJSRuntime JSRuntime
+@implements IDisposable
 
 <h3>Cloth VAT Viewer</h3>
 
@@ -37,5 +38,10 @@
     {
         var materialName = e.Value.ToString();
         await JSRuntime.InvokeVoidAsync("setClothVatViewerMaterial", materialName);
+    }
+
+    public void Dispose()
+    {
+        JSRuntime.InvokeVoidAsync("disposeClothVatViewer");
     }
 }

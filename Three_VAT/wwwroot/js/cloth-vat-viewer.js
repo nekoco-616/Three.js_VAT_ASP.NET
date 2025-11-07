@@ -4,6 +4,7 @@
     // Scope variables
     let clock;
     let scene; // Make scene accessible to the switcher function
+    let animationFrameId; // To cancel the animation frame
 
     // The VAT shader patch function
     const patchShader = (shader, uniforms) => {
@@ -116,7 +117,7 @@
 
         // --- Animation Loop ---
         const animate = () => {
-            requestAnimationFrame(animate);
+            animationFrameId = requestAnimationFrame(animate);
             const deltaTime = clock.getDelta();
             
             // Update shared uniforms
@@ -126,6 +127,29 @@
             renderer.render(scene, camera);
         };
         animate();
+    };
+
+    window.disposeClothVatViewer = () => {
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+        }
+        if (scene) {
+            scene.traverse(object => {
+                if (object.isMesh) {
+                    if (object.geometry) {
+                        object.geometry.dispose();
+                    }
+                    if (object.material) {
+                        if (Array.isArray(object.material)) {
+                            object.material.forEach(material => material.dispose());
+                        } else {
+                            object.material.dispose();
+                        }
+                    }
+                }
+            });
+            scene = null;
+        }
     };
 
     // --- Material Switcher Function ---
