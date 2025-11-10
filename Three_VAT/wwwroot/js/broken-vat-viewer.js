@@ -132,7 +132,7 @@
         // --- Scene, Camera, Renderer ---
         scene = new THREE.Scene();
         scene.background = new THREE.Color(0);
-        const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 3000);
         camera.position.z = 5;
         const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
         console.log("Is WebGL 2 available?", renderer.capabilities.isWebGL2);

@@ -1,0 +1,43 @@
+@page "/fluid-vat-viewer"
+@inject IJSRuntime JSRuntime
+@implements IDisposable
+
+<h3>Fluid VAT Viewer</h3>
+
+<p>A static FBX model animated by a position texture. Use the radio buttons to switch materials.</p>
+
+<div>
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="materialRadio" id="lambertRadio" value="lambert" checked @onchange="OnMaterialChanged" />
+        <label class="form-check-label" for="lambertRadio">Lambert</label>
+    </div>
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="materialRadio" id="wireframeRadio" value="wireframe" @onchange="OnMaterialChanged" />
+        <label class="form-check-label" for="wireframeRadio">Wireframe</label>
+    </div>
+</div>
+
+<canvas id="vat-fluid-fbx-canvas" width="800" height="600" style="border: 1px solid black; margin-top: 10px;"></canvas>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("initFluidVatViewer",
+                "vat-fluid-fbx-canvas"
+                );
+        }
+    }
+
+    private async Task OnMaterialChanged(ChangeEventArgs e)
+    {
+        var materialName = e.Value.ToString();
+        await JSRuntime.InvokeVoidAsync("setFluidVatViewerMaterial", materialName);
+    }
+
+    public void Dispose()
+    {
+        JSRuntime.InvokeVoidAsync("disposeFluidVatViewer");
+    }
+}
