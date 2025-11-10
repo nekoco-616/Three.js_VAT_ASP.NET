@@ -26,7 +26,7 @@ jobs:
           include-prerelease: true
 
       - name: Publish .NET Project
-        run: dotnet publish Three_VAT.csproj -c Release -o release --nologo
+        run: dotnet publish Three_VAT/Three_VAT.csproj -c Release -o release --nologo
         # ★★★ "YourProjectName.csproj" を、あなたのプロジェクトの .csproj ファイル名に書き換えてください ★★★
 
       - name: Upload artifact
