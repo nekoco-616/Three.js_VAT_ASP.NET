@@ -24,13 +24,8 @@
     {
         if (firstRender)
         {
-            float frame = 250.0f;
-            
             await JSRuntime.InvokeVoidAsync("initClothVatViewer",
-                "vat-minimal-fbx-canvas",
-                "models/FBX_HQ.fbx",
-                "textures/TEX_HQ_dynamic_pos.exr",
-                frame);
+                "vat-minimal-fbx-canvas");
         }
     }
 
